@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=1">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bubbly-bg@1.0.0/dist/bubbly-bg.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
+
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/cn2t.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.0/marked.min.js"
+        integrity="sha512-4+zFvAejSGVlybiAKYyAz3KMjmbIT7I+wXgx190ZAsT19L2z8S4htBy1scR7CyP9pDKNSaolJMLedCigA/gFVg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <link rel="stylesheet" href="./css/loader_style.css">
+    <link rel="stylesheet" href="./css/RWD.css">
+
+    <script src="./js/nav.js"></script>
+    <script src="./js/loader_function.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;500&display=swap" rel="stylesheet">
+
+
+    <title>情緒分析應用於社群論壇之文件探勘</title>
+
+    <style type="text/css">
+        .jumbotron {
+            padding: 4rem 2rem;
+            margin-bottom: 2rem;
+            border-radius: .3rem;
+        }
+        .discuss-rank-address-block{
+            margin-left: 40px;
+            margin-top: 10px;
+        }
+        .discuss-rank-address-block span {
+            font-size: 20px;
+        }
+
+        .discuss_rank_address{
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns:  repeat(3, 1fr);
+            grid-template-rows: repeat(4, 50px);
+        }
+        .discuss_rank_address > div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .discuss_rank_address .full-color{
+            background-color: #3cc796;
+            color: white;
+        }
+        .discuss_rank_address .first i{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2px;
+        }
+        .summary-wrapper{
+            position: relative;
+        }
+
+        .summary-loader {
+            display: none;
+        }
+
+        .summary-loader.active {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: block;
+            margin:15px auto;
+            position: relative;
+            color: #3cc796;
+            box-sizing: border-box;
+            animation: animloader 1s linear infinite alternate;
+            position: absolute;
+            right: 50%;
+            top: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        @keyframes animloader {
+            0% {
+                box-shadow: -38px -6px, -14px 6px,  14px -6px;
+            }
+            33% {
+                box-shadow: -38px 6px, -14px -6px,  14px 6px;
+            }
+            66% {
+                box-shadow: -38px -6px, -14px 6px, 14px -6px;
+            }
+            100% {
+                box-shadow: -38px 6px, -14px -6px, 14px 6px;
+        }
+        }
+    </style>
+</head>
+
+<body onload="search()" id="app">
+<!--    <div id="top"></div>-->
+    
+    <nav class="navbar p-3 navbar-expand-lg">
+        
+        <div class="container">
+            <a href="#" onclick="home()" @click="home" id="logo" class="navbar-brand"><img src="logo.png"></a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a href="#" onclick="home()" @click="home" class="nav_li">首頁</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" onclick="result()" class="nav_li" @click="search_btn();">搜尋結果</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" onclick="news()" class="nav_li" @click="news_btn(); other_bubble();">最新消息</a>
+      </li>
+      <li>
+                            <a href="#sublist" data-bs-toggle="collapse" id="dropdown" class="nav-item collapsed"
+                                aria-expanded="false">登入/註冊</a>
+                            <ul id="sublist" class="list-unstyled collapse nav_li">
+                                <li>
+                                    <a href="#" id="dropdown_login" onclick="login()" @click="other_bubble">登入</a>
+                                </li>
+                                <li>
+                                    <a href="#" id="dropdown_register" onclick="register()" @click="other_bubble">註冊</a>
+                                </li>
+                            </ul>
+                        </li>
+        <li>
+                            <a href="#" id="user_collection" class="nav_li" onclick="collection()"
+                                style="display: none;" @click="collect_get(); other_bubble();">收藏列表</a>
+                        </li>
+                        <li>
+                            <p id="user_account" class="nav_li" style="display: none;">使用者：{{account_input}}</p>
+                        </li>
+                        <li>
+                            <a href="#" id="logout" class="nav_li" style="display: none;" @click="logout_btn">登出</a>
+                        </li>
+    </ul>
+      <p id="top_data" style="font-size: 15px;"></p>
+  </div>
+        </div>
+</nav>
+    
+    <div id="all_body">
+        <div class="container-all">
+            <!--<div id="sliderbar_top">
+                <button type="button" id="collapse" class="collapse-btn">
+                    <i class="fa-solid fa-bars" style="color: white;"></i>
+                </button>
+            </div>
+            <div id="c_left" class="container-left">
+                <nav id="siderbar">
+                    <div style="display: flex" onclick="home()">
+                        <a href="#" id="logo"><img src="logo.png"></a>
+                    </div>
+
+                    <ul class="list-unstyled">
+                        <li>
+                            <hr class="hr">
+                            <a href="#" onclick="home()" class="nav_li">首頁</a>
+                        </li>
+                        <li>
+                            <a href="#" onclick="result()" class="nav_li" @click="search_btn">搜尋結果</a>
+                        </li>
+                        <li>
+                            <a href="#" onclick="news()" class="nav_li" @click="news_btn">最新消息</a>
+                        </li>
+                        <!--
+                <li>
+                    <a href="#" class="nav_li">關於我們(暫留)</a>
+                </li>
+
+                        <li>
+                            <a href="#sublist" data-bs-toggle="collapse" id="dropdown" class="collapsed"
+                                aria-expanded="false">登入/註冊</a>
+                            <ul id="sublist" class="list-unstyled collapse nav_li">
+                                <li>
+                                    <a href="#" id="dropdown_login" onclick="login()">登入</a>
+                                </li>
+                                <li>
+                                    <a href="#" id="dropdown_register" onclick="register()">註冊</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" id="user_collection" class="nav_li" onclick="collection()"
+                                style="display: none;" @click="collect_get">收藏列表</a>
+                        </li>
+                        <li>
+                            <p id="user_account" class="nav_li" style="display: none;">使用者：{{account_input}}</p>
+                        </li>
+                        <li>
+                            <a href="#" id="logout" class="nav_li" style="display: none;" @click="logout_btn">登出</a>
+                        </li>
+
+                        <li>
+                            <input type="text" placeholder="Input api for demo" v-model="test_api">
+                        </li>
+
+                    </ul>
+                </nav>
+            </div>-->
+
+            <div class="container-right">
+                <div id="loader"></div>
+                <div class="container-fluid">
+                    <section id="search" class="animate-bottom" data-aos="fade-right">
+                        <div class='jumbotron'>
+                            <div class='container'>
+                                <div class='row'>
+                                    <div class='col-md-12'>
+                                        <h1>情緒分析應用於社群論壇之文件探勘</h1>
+                                        <p>輸入事件以產生分析結果</p>
+                                        <div style="display:flex; flex-direction:column; justify-content:center;">
+                                            <input v-model="topic" type="text" id="search_box">
+                                            <div id="time_set">
+                                                <div style="display: flex">
+                                                    <p>開始時間：</p>
+                                                    <input type="date" id="search_start">
+                                                </div>
+                                                <div style="display: flex;">
+                                                    <p>結束時間：</p>
+                                                    <input type="date" id="search_end">
+                                                </div>
+                                                <div style="display: flex;">
+                                                    <p>日期間隔：</p>
+                                                    <input type="text" id="dateRange" placeholder="30天">
+                                                </div>
+                                            </div>
+                                            <div style="display: flex;align-items: center">
+                                            <button type="button" id="start_search_btn" onclick="result()"
+                                                    @click="other_bubble();search_btn();">搜尋</button>
+                                            <button type="button" @click="search_select" style="width: 100px;margin-left: 20px">細項設定</button>
+                                            </div>
+                                            <dialog id="select_dialog">
+                                                <div id="mode_select">
+                                                <h5>選擇模式：</h5>
+                                                <div style="display: flex-warp">
+                                                    <input type="radio" name="mode" value="0" checked>僅搜尋標題及內文
+                                                    <input type="radio" name="mode" value="1">搜尋標題、內文及留言
+                                                </div>
+                                            </div>
+                                            <div style="display: flex;align-items: center;">
+                                                <div id="isExactMatch_info">
+                                                    <h5>是否開啟精準搜尋</h5>
+                                                    <label class="switch">
+                                                        <input type="checkbox" id="search_slider">
+                                                        <span class="slider round"></span>
+                                                    </label>
+                                                </div>
+<!--
+                                                <div id="role">
+                                                    <div style="display: flex">
+                                                        <h5>搜尋職業</h5>
+                                                        <button type="button" @click="role_btn" style="margin-left: 10px; font-size: 15px;height: 25px;text-align: center">選擇</button>
+                                                    </div>
+                                                    <h5>職業：{{search_input.role}}</h5>
+                                                    
+                                                    <dialog id="role_dialog"
+                                                        style="justify-content:center;align-items:center;flex-direction:column;">
+                                                        <h3>請選擇您的職業定位</h3>
+                                                        <input type="radio" name="role_select" value="normal" checked >一般民眾
+                                                        <input type="radio" name="role_select" value="politics">政治人物
+                                                        <input type="radio" name="role_select" value="business">商業企業
+                                                        <input type="radio" name="role_select" value="technology">科技公司
+                                                        <input type="radio" name="role_select" value="other">其他
+                                                        <div>
+                                                            <button id="role_dialog_close_btn" style="margin-top: 10px;" @click="role_dialog_close">確認</button>
+                                                        </div>
+                                                        
+                                                    </dialog>
+                                                </div>
+-->
+                                                
+                                            </div>
+                                                <button type="button" @click="close_search_select">確定</button>
+                                            </dialog>
+                                            
+                                        </div>
+                                        <div id="Popular_Article_info">
+                                            <div style="display: flex;align-items: flex-end;">
+                                                <h3 style="display: flex;">熱門關鍵字　</h3>
+                                                <h5>{{recommend_info_title}}</h5>
+                                            </div>
+                                            <div id="Popular_Article_show">
+                                                <p>{{recommend_info}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                    </section>
+                    <section id="result" class="animate-bottom" style="display: none;" data-aos="fade-right">
+                        <div class='jumbotron'>
+                            <div class='container'>
+                                <div class='row'>
+                                    <div class='col-md-12'>
+                                        <div>
+                                            <h1 id="result_topic">{{search_input.topic}}</h1>
+                                            <div id="result_top">
+                                                <div style="display: flex;flex-direction: column;">
+                                                <h2 id="summary_title">摘要</h2>
+                                                <div class="summary-wrapper" style="display:flex;flex-direction:column; background-color: white;">
+                                                    <span class="summary-loader" :class="{'active': summary === ''}"></span>
+
+                                                    <div 
+                                                        id="summary_content" 
+                                                        v-html="summary" 
+                                                    >
+                                                    </div>
+                                                </div>
+                                                </div>
+                                                <div style="display:flex-warp;flex-direction:column;">
+                                                    <div id="result_btn_list">
+                                                        <button type="button" class="summary_btn" @click="good"><i
+                                                                class="fa-solid fa-thumbs-up"
+                                                                style="margin-left:0;"></i></button>
+                                                        <button type="button" class="summary_btn" @click="bad"><i
+                                                                class="fa-solid fa-thumbs-down"></i></button>
+                                                        <button type="button" class="summary_btn" @click="save_btn"><i
+                                                                class="fa-solid fa-heart"></i></button>
+                                                        <a href="https://www.google.com/" target="_blank"><button
+                                                                type="button" id="related_link"
+                                                                class="summary_btn">相關連結</button></a>
+                                                    </div>
+                                                    <div id="b_sum">
+                                                    </div>
+                                                    <div 
+                                                        class="discuss-rank-address-block" 
+                                                        v-if="discuss_rank_address?.length > 0"
+                                                    >
+                                                        <span>討論地區前三名</span>
+                                                        <div class="discuss_rank_address">
+                                                            <div></div>
+                                                            <div class="first">
+                                                                <i class="fa-solid fa-crown" style="color: #ffe431;"></i> 
+                                                                {{ discuss_rank_address[0] }}
+                                                            </div>
+                                                            <div></div>
+                                                            <div> {{ discuss_rank_address[1] }} </div>
+                                                            <div class="full-color">1st</div>
+                                                            <div></div>
+                                                            <div class="full-color">2nd</div>
+                                                            <div class="full-color"></div>
+                                                            <div> {{ discuss_rank_address[2] }} </div>
+                                                            <div class="full-color"></div>
+                                                            <div class="full-color"></div>
+                                                            <div class="full-color">3rd</div>
+                                                        </div>
+                                                    </div>
+                                                    <dialog id="collect_info"
+                                                        style="justify-content:center;align-items:center;flex-direction:column;">
+                                                        <p>請選擇要儲存的資料夾及儲存名稱</p>
+                                                        <select id="select_folder1" @change="folder_change_result"
+                                                            v-html="folder">
+                                                        </select>
+                                                        <input type="text" id="collect_info_box">
+                                                        <div>
+                                                            <button id="save" @click="save">儲存</button>
+                                                            <button id="cancel" @click="cancel_save">取消</button>
+                                                        </div>
+                                                    </dialog>
+                                                    <div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr id="map_hr">
+                                        <div id="map_info_div">
+                                            <div data-aos="fade-right">
+                                                <div style="display: flex;justify-content: space-between;align-items: flex-end;">
+                                                    <h2 id="map_title">地區討論</h2>
+                                                    <h5>可點擊地區進行資料篩選</h5>
+                                                    <button type="button" @click="origin_search" style="margin-bottom: 5px;">還原</button>
+<!--                                                    <h4 id="address"></h4>-->
+                                                </div>
+                                                <div id="map_div">
+                                                    <div id="map"></div>
+                                                </div>
+                                            </div>
+                                            <div style="margin-left: 40px;margin-top: 20px;" data-aos="fade-left">
+                                                <h2 id="discuss_num">討論數量最高地區：{{discuss_num}}</h2>
+                                                <h3 id="discuss_other_num"style="margin-top:10px"><span style="color: red">國外</span>地區討論數：{{discuss_other_num}}</h3>
+                                                <h3 id="now_area" style="margin-top: 10vh">現在點選地區：</h3>
+<!--                                                <h4 id="now_area_num">點選地區數值：</h4>-->
+                                                <h4 id="now_area_discuss_num_top" style="margin-top: 10vh">討論密度最高縣市：{{now_area_discuss_num_top}}</h4>
+                                                <h4 id="now_area_discuss_num">討論密度：</h4>
+                                                <h5>討論數/人口數</h5>
+                                                
+                                            </div>
+                                        </div>
+                                        <hr id="bar_chart_hr">
+                                        <!--                                        <h2 id="bar_chart_title">事件討論數</h2>-->
+                                        <div data-aos="fade-down">
+                                        <h2 id="bar_chart_title">熱度分析</h2>
+                                        <div id="bar_chart_range" data-aos="fade-down">
+                                            <div class="bar_chart_overflow">
+                                                <div id="bar_chart_div">
+                                                    <canvas id="bar_chart"></canvas>
+                                                </div>
+                                            </div>
+                                            <div id="bar_chart_info">
+                                                <p id=b_reverse></p>
+                                                <p id="b_max"></p>
+<!--
+                                                <h5 id="b_min">討論數量上升期間：</h5>
+                                                <table id="b_min_table" style="text-align: center;">
+                                                
+                                                </table>
+                                                <p>此表旨在標註該議題明顯獲取關注的時間點</p>
+                                                
+                                                <h5 id="b_down" style="margin-top: 50px;">討論數量下降期間：</h5>
+                                                <table id="b_down_table" style="text-align: center;">
+                                                
+                                                </table>
+                                                <p>此表旨在標註該議題討論數明顯下降的時間點</p>
+-->
+                                            </div>
+                                        </div>
+                                        <div id="zoom_map" data-aos="fade-right">
+                                            <div>
+                                                <div class="bar_chart_overflow">
+                                                    <div style="display: flex;justify-content: space-between;">
+                                                        <h4>集中檢視</h4>
+                                                    </div>
+                                                    <div id="bar_chart_zoom_div">
+                                                        <canvas id="bar_chart_zoom"
+                                                            style="background-color: white;"></canvas>
+                                                    </div>
+                                                </div>
+
+                                                <div id="message_count">
+                                                </div>
+                                                <div id="bar_link">
+                                                </div>
+                                                <dialog id="bar_dialog">
+                                                    <div>
+                                                        <h1>文章標題、日期</h1>
+                                                        <div style="display: flex">
+                                                            <p id="bar_article_title" style="font-size: 25px;"></p>
+                                                            <p style="margin-left: 30px;font-size:25px;" id="bar_article_date"></p>
+                                                        </div>
+                                                        <h1 style="margin-top:10px">文章內文</h1>
+                                                        <p id="bar_article_content"></p>
+                                                        <h1 style="margin-top:10px">文章留言</h1>
+                                                        <div style="display: flex">
+                                                            <div>
+                                                        <table id="bar_article_push_pos">
+
+                                                        </table>
+                                                        </div>
+                                                        <div style="margin-left: 10px;">
+                                                        <table id="bar_article_push_neg">
+
+                                                        </table>
+                                                                </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" onclick="bar_dialog_close()">關閉</button>
+                                                </dialog>
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <hr id="line_chart_hr">
+                                        <div data-aos="fade-down">
+                                        <h2>正負向評價數</h2>
+                                        <div id="line_chart_range">
+                                            <div id="line_chart_title">
+                                                <h5>總體趨勢</h5>
+                                                <div id="line_chart_div_all">
+                                                    <canvas id="line_chart_all"></canvas>
+                                                </div>
+                                            </div>
+                                            <div id="line_chart_zoom_title">
+                                                <div style="display: flex;" data-aos="fade-right">
+                                                    <h5>放大檢視</h5>
+                                                    <button type="button" @click="article_dialog_show(); pos_sort()"
+                                                        style="margin-left: 20px;">評價列表</button>
+                                                </div>
+                                                <dialog id="article_dialog">
+                                                    <div id="article_dialog_btn">
+                                                        <button type="button" @click="article_dialog_close">關閉</button>
+                                                        <button type="button" @click="pos_atr">正向評價</button>
+                                                        <button type="button" @click="neg_atr">負向評價</button>
+                                                    </div>
+                                                    <div id="article_dialog_info"
+                                                        style="display: flex;justify-content: center">
+                                                        <table id="article_dialog_table">
+
+                                                        </table>
+                                                    </div>
+                                                </dialog>
+                                                <div id="line_chart_zoom_height" data-aos="fade-right">
+                                                    <div id="line_chart_zoom_overflow">
+                                                        <div id="line_chart_div">
+                                                            <canvas id="line_chart"
+                                                                style="background-color: white;"></canvas>
+                                                        </div>
+                                                    </div>
+                                                    <div id="pie_chart_div_2">
+                                                        <div id="line_chart_pie_chart_div_2" data-aos="zoom-in">
+                                                            <canvas id="line_chart_pie_chart_2"
+                                                                style="background-color: white;"></canvas>
+                                                        </div>
+                                                        <div id="line_chart_info" data-aos="fade-left">
+                                                            <div id="p_info">
+                                                                <p id="p_sum"></p>
+                                                                <!--                                                    <p id="n_sum"></p>-->
+                                                                <div>
+                                                                    <button id="line_data_btn1"
+                                                                        @click="line_data1_click"
+                                                                        style="display: none">詳細資料</button>
+                                                                </div>
+                                                            </div>
+                                                            <div id="n_info">
+                                                                <p id="p_max"></p>
+                                                                <div>
+                                                                    <button id="line_data_btn2"
+                                                                        @click="line_data2_click"
+                                                                        style="display: none">詳細資料</button>
+                                                                </div>
+                                                                <p id="n_max"></p>
+                                                                <div>
+                                                                    <button id="line_data_btn3"
+                                                                        @click="line_data3_click"
+                                                                        style="display: none">詳細資料</button>
+                                                                </div>
+                                                            </div>
+                                                            <dialog id="line_data_dialog1">
+                                                                <div style="display: flex">
+                                                                    <button id="line_data_dialog1_close"
+                                                                        style="display: flex;justify-content: end;"
+                                                                        @click="line_data_dialog1_close">關閉</button>
+                                                                    <h5 style="margin-left: 20px;">關鍵字詳細排序</h5>
+                                                                </div>
+                                                                <div id="line_data_1">
+                                                                    <table id="line_table_all_1">
+                                                                    </table>
+                                                                    <table id="line_table_nb_1">
+                                                                    </table>
+                                                                    <table id="line_table_adj_1">
+                                                                    </table>
+                                                                </div>
+                                                            </dialog>
+
+                                                            <dialog id="line_data_dialog2">
+                                                                <div style="display: flex">
+                                                                    <button id="line_data_dialog2_close"
+                                                                        style="display: flex;justify-content: end;"
+                                                                        @click="line_data_dialog2_close">關閉</button>
+                                                                    <h5 style="margin-left: 20px;">正向關鍵字詳細排序</h5>
+                                                                </div>
+                                                                <div id="line_data_2">
+                                                                    <table id="line_table_all_2">
+                                                                    </table>
+                                                                    <table id="line_table_nb_2">
+                                                                    </table>
+                                                                    <table id="line_table_adj_2">
+                                                                    </table>
+                                                                </div>
+                                                            </dialog>
+
+                                                            <dialog id="line_data_dialog3">
+                                                                <div style="display: flex">
+                                                                    <button id="line_data_dialog3_close"
+                                                                        style="display: flex;justify-content: end;"
+                                                                        @click="line_data_dialog3_close">關閉</button>
+                                                                    <h5 style="margin-left: 20px;">負向關鍵字詳細排序</h5>
+                                                                </div>
+                                                                <div id="line_data_3">
+                                                                    <table id="line_table_all_3">
+                                                                    </table>
+                                                                    <table id="line_table_nb_3">
+                                                                    </table>
+                                                                    <table id="line_table_adj_3">
+                                                                    </table>
+                                                                </div>
+                                                            </dialog>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="line_link" data-aos="fade-right">
+                                                    <div style="display: flex-warp">
+                                                        <p id="line_link_date"></p>
+                                                        <div id="line_plink">
+                                                        </div>
+                                                        <div id="line_pinfo">
+                                                        </div>
+                                                        <div id="line_nlink">
+                                                        </div>
+                                                        <div id="line_ninfo">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <dialog id="line_pos_dialog">
+                                                    <div>
+                                                        <h1>文章標題、日期</h1>
+                                                        <div style="display: flex">
+                                                            <p id="line_pos_article_title" style="font-size: 25px;"></p>
+                                                            <p style="margin-left: 30px;font-size: 25px;" id="line_pos_article_date"></p>
+                                                        </div>
+                                                        <h1 style="margin-top:10px">文章內文</h1>
+                                                        <p id="line_pos_article_content"></p>
+                                                        <h1 style="margin-top:10px">文章留言</h1>
+                                                        <div style="display: flex">
+                                                            <div>
+                                                        <table id="line_pos_article_push_pos">
+
+                                                        </table>
+                                                        </div>
+                                                        <div style="margin-left: 10px;">
+                                                        <table id="line_pos_article_push_neg">
+
+                                                        </table>
+                                                                </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" onclick="line_pos_dialog_close()">關閉</button>
+                                                </dialog>
+                                                    <dialog id="line_neg_dialog">
+                                                    <div>
+                                                        <h1>文章標題、日期</h1>
+                                                        <div style="display: flex">
+                                                            <p id="line_neg_article_title" style="font-size: 25px;"></p>
+                                                            <p style="margin-left: 30px;font-size: 25px;" id="line_neg_article_date"></p>
+                                                        </div>
+                                                        <h1 style="margin-top:10px">文章內文</h1>
+                                                        <p id="line_neg_article_content"></p>
+                                                        <h1 style="margin-top:10px">文章留言</h1>
+                                                        <div style="display: flex">
+                                                            <div>
+                                                        <table id="line_neg_article_push_pos">
+
+                                                        </table>
+                                                        </div>
+                                                        <div style="margin-left: 10px;">
+                                                        <table id="line_neg_article_push_neg">
+
+                                                        </table>
+                                                                </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" onclick="line_neg_dialog_close()">關閉</button>
+                                                </dialog>
+                                                    
+                                                    <div id="line_chart_pie_chart_div_1" data-aos="zoom-in">
+                                                        <canvas id="line_chart_pie_chart_1"
+                                                            style="background-color: white;"></canvas>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        </div>
+                                        <hr id="word_cloud_hr">
+                                        <div data-aos="fade-down">
+                                        <h2 id="word_cloud_title" data-aos="fade-right">關鍵字文字雲</h2>
+                                        <div id="word_cloud_range">
+                                            <p style="font-size:30px" data-aos="fade-right">正向&負向文字雲</p>
+                                            <div id="WordCloud_all" data-aos="fade-down">
+                                                <div id="word_cloud1" class="word_display" @click="wc1_click"></div>
+                                                <div id="word_cloud4" class="word_display" @click="wc4_click"></div>
+                                                <div id="word_cloud5" class="word_display" @click="wc5_click"></div>
+                                            </div>
+                                            <p id="pos_wc_info" style="font-size:30px" data-aos="fade-right">正向文字雲</p>
+                                            <div id="WordCloud_pos" data-aos="fade-down">
+                                                <div id="word_cloud2" class="word_display" @click="wc2_click"></div>
+                                                <div id="word_cloud6" class="word_display" @click="wc6_click"></div>
+                                                <div id="word_cloud7" class="word_display" @click="wc7_click"></div>
+                                            </div>
+                                            <p id="neg_wc_info" style="font-size:30px" data-aos="fade-right">負向文字雲</p>
+                                            <div id="WordCloud_neg" data-aos="fade-down">
+                                                <div id="word_cloud3" class="word_display" @click="wc3_click"></div>
+                                                <div id="word_cloud8" class="word_display" @click="wc8_click"></div>
+                                                <div id="word_cloud9" class="word_display" @click="wc9_click"></div>
+                                            </div>
+                                        </div>
+                                        <!--
+                                        <hr id="accuracy_hr">
+                                            <h2 id="accuracy_title">資料準確度</h2>
+                                            <div id="accuracy_range">
+                                                <div style="display: flex;">
+                                                    <h5 id="accuracy_count">預測筆數：</h5>
+                                                    <h5 id="accuracy_data" style="margin-left: 100px;">準確率：</h5>
+                                                </div>
+                                                <div style="display: flex;">
+                                                    <table>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>實際<p>(負向)</p></td>
+                                                        <td>實際<p>(正向)</p></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>預測<br><p>(負向)</p></td>
+                                                        <td id="TP"></td>
+                                                        <td id="FP"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>預測<br><p>(正向)</p></td>
+                                                        <td id="FN"></td>
+                                                        <td id="TN"></td>
+                                                    </tr>
+                                                    </table>
+                                                    <img id="accuracy_img" style="margin-left: 20px;height:50vh;width:25vw;">
+                                                </div>
+                                                
+                                            </div>
+-->
+
+                                        <dialog id="word_cloud1_dialog">
+                                            <button id="wc1_close" style="display: flex;justify-content: end;"
+                                                @click="wc1_close">關閉</button>
+                                            <div id="wc1">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud2_dialog">
+                                            <button id="wc2_close" style="display: flex;justify-content: end;"
+                                                @click="wc2_close">關閉</button>
+                                            <div id="wc2">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud3_dialog">
+                                            <button id="wc3_close" style="display: flex;justify-content: end;"
+                                                @click="wc3_close">關閉</button>
+                                            <div id="wc3">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud4_dialog">
+                                            <button id="wc4_close" style="display: flex;justify-content: end;"
+                                                @click="wc4_close">關閉</button>
+                                            <div id="wc4">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud5_dialog">
+                                            <button id="wc5_close" style="display: flex;justify-content: end;"
+                                                @click="wc5_close">關閉</button>
+                                            <div id="wc5">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud6_dialog">
+                                            <button id="wc6_close" style="display: flex;justify-content: end;"
+                                                @click="wc6_close">關閉</button>
+                                            <div id="wc6">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud7_dialog">
+                                            <button id="wc7_close" style="display: flex;justify-content: end;"
+                                                @click="wc7_close">關閉</button>
+                                            <div id="wc7">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud8_dialog">
+                                            <button id="wc8_close" style="display: flex;justify-content: end;"
+                                                @click="wc8_close">關閉</button>
+                                            <div id="wc8">
+                                            </div>
+                                        </dialog>
+                                        <dialog id="word_cloud9_dialog">
+                                            <button id="wc9_close" style="display: flex;justify-content: end;"
+                                                @click="wc9_close">關閉</button>
+                                            <div id="wc9">
+                                            </div>
+                                        </dialog>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </section>
+                    <section id="login" class="animate-bottom" style="display: none;" data-aos="fade-down">
+                        <div class='jumbotron'>
+                            <div class='container'>
+                                <div class='row'>
+                                    <div class='col-md-12'>
+                                        <h1>使用者登入</h1>
+                                        <h3>帳號：<input type="text" v-model="account_input"></h3>
+                                        <h3>密碼：<input type="text" v-model="password_input"></h3>
+                                        <div style="display:flex; flex-direction:column; justify-content:center;">
+                                            <button type="button" @click="login_btn" onclick="search()">登入</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="register" class="animate-bottom" style="display: none;" data-aos="fade-down">
+                        <div class='jumbotron'>
+                            <div class='container'>
+                                <div class='row'>
+                                    <div class='col-md-12'>
+                                        <div
+                                            style="display:flex; flex-direction:column; justify-content:center;width: 505px;">
+                                            <h1>使用者註冊</h1>
+                                            <h3>帳號：<input type="text" v-model="account_input"></h3>
+                                            <h3>密碼：<input type="text" v-model="password_input"></h3>
+                                            <h3 style="margin-left:-55px;">電子信箱：<input type="text"
+                                                    v-model="email_input"></h3>
+                                            <div style="display:flex; flex-direction:column; justify-content:center;">
+                                                <button type="button" @click="register_btn"
+                                                    onclick="search()">註冊</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="collection" class="animate-bottom" style="display: none;" data-aos="fade-down">
+                        <div class='jumbotron'>
+                            <div class='container'>
+                                <div class='row'>
+                                    <div class='col-md-12'>
+                                        <div id="collect_top" style="display: flex;justify-content: Space-between;">
+                                            <h1>{{account_input}}的收藏列表</h1>
+                                            <button type="button" id="new_collect" class="summary_btn"
+                                                @click="new_collect_btn"><i class="fa-solid fa-plus"></i></button>
+                                        </div>
+                                        <div id="collection_list" v-html="collect_text">
+                                        </div>
+                                        <dialog id="new_collect_info"
+                                            style="justify-content:center;align-items:center;flex-direction:column;">
+                                            <h2>此頁面可修改資料夾、刪除項目或資料夾</h2>
+                                            <hr>
+                                            <p>請選擇欲修改的資料夾</p>
+                                            <select id="select_folder2" @change="folder_change_collect" v-html="folder">
+                                            </select>
+                                            <p id="delete_item_info">請選擇欲刪除的項目</p>
+                                            <select id="select_item" @change="item_change()" v-html="item">
+                                            </select>
+                                            <input type="text" id="collect_change_info_box" placeholder="輸入新增或修改的名稱">
+                                            <div id="collection_dialog_btn">
+                                                <button id="new_folder" @click="collect_post_folder">新增</button>
+                                                <button id="change_folder_post"
+                                                    @click="collect_post_change_folder">修改名稱</button>
+                                                <button id="change_folder_delete"
+                                                    @click="collect_delete_change_folder">刪除</button>
+                                                <button id="cancel_folder" @click="new_collect_cancel">取消</button>
+                                            </div>
+                                        </dialog>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="news" class="animate-bottom" style="display: none" data-aos="fade-down">
+                        <div class='jumbotron'>
+                            <div class='container'>
+                                <div class='row'>
+                                    <div class='col-md-12'>
+                                        <h1>最新消息</h1>
+                                        <hr>
+                                        <div id="news_display" v-html="news_text">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+        function article_dialog_show(push_select){
+            var push = [];
+            var id1 = "",id2 = "",dialog_name="";
+            var pos_num = 0,neg_num = 0;
+            switch(push_select){
+                case 1 :push = vm.bar_push;id1="bar_article_push_pos";id2="bar_article_push_neg";dialog_name="bar_dialog";break;
+                
+                case 2 :push = vm.line_pos;id1="line_pos_article_push_pos";id2="line_pos_article_push_neg";dialog_name="line_pos_dialog";break;
+                    
+                case 3 :push = vm.line_neg;id1="line_neg_article_push_pos";id2="line_neg_article_push_neg";dialog_name="line_neg_dialog";break;
+            }
+            
+            
+            
+            var text_pos = "<tr><th style='width:45vw;text-align:center;font'><h4>正向留言</h4></th></tr>";
+            var text_neg = "<tr><th style='width:45vw;text-align:center;'><h4>負向留言</h4></th></tr>";
+
+                            for(let i = 0;i<20;i++){
+                                if(push[i] == null){
+                                    break;
+                                }
+                                else if(push[i].pushContentSentiment == "negative"){
+                                    text_neg += "<tr><td>" + push[i].pushContent + "</td></tr>";
+                                    neg_num++;
+                                }
+                                else if(push[i].pushContentSentiment == "positive"){
+                                    text_pos += "<tr><td>" + push[i].pushContent + "</td></tr>";
+                                    pos_num++;
+                                }
+                            }
+                            
+                            if(pos_num == 0){
+                                text_pos += "<tr><td>" + "無" + "</td></tr>";
+                            }
+                            if(neg_num == 0){
+                                text_neg += "<tr><td>" + "無" + "</td></tr>";
+                            }
+            
+                            document.getElementById(id1).innerHTML = text_pos;
+                            document.getElementById(id2).innerHTML = text_neg;
+        document.getElementById(dialog_name).showModal();
+    }
+    function bar_dialog_close(){
+        document.getElementById("bar_dialog").close();
+    }
+    function line_pos_dialog_close(){
+        document.getElementById("line_pos_dialog").close();
+    }
+    function line_neg_dialog_close(){
+        document.getElementById("line_neg_dialog").close();
+    }
+
+        
+</script>
+<script type="module">
+    
+    import chart from "./js/chart.js";
+    import search from "./js/search.js";
+    import news from "./js/news.js";
+    import login from "./js/login.js";
+    import logout from "./js/logout.js";
+    import register from "./js/register.js";
+    import collect from "./js/collect.js";
+    import bubble from "./js/bubble.js";
+    import { summary_api_url, api_url } from "./js/config.js";
+
+
+    
+
+    var login_statu = 0;
+    var id = 0, id_index = 0, item_id = 0;
+    var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJKd3RBdXRoRGVtbyIsInN1YiI6IjEwMDAwIiwidW5pcXVlX25hbWUiOiIxMDAwMCIsIm5hbWVpZCI6IjEwMDAwIiwibmFtZSI6IjEwMDAwIiwiZXhwIjoxNjkwMjIxMTg0LCJqdGkiOiJiNjQwOTZjMy04MWI4LTQ0ZTYtODQ5OC1hNGRkMmE5NDlkMTAiLCJyb2xlIjoiVXNlcnMiLCJuYmYiOjE2OTAyMTkzODQsImlhdCI6MTY5MDIxOTM4NH0.3Ki-R1DOnBeheLomO3z4PTzFi5jpypjYfkP7_ROo37I";
+    Chart.register(ChartDataLabels);
+
+    const vm = Vue.createApp({
+        data() {
+            return {
+                search_input: {
+                    "topic": "",
+                    "startDate": "",
+                    "endDate": "",
+                    "dateRange": "",
+                    "isExactMatch": false,
+                    "mode": 0,
+                    //"role":"一般民眾",
+                },
+                recommend_info_title: "分析筆數：",
+                recommend_info: "",
+                account_input: "",
+                password_input: "",
+                email_input: "",
+                result_text: [],
+                news_text: "",
+                collect_text: "",
+                collect_data: [],
+                folder: "",
+                item: "<option selected>請選擇項目</option>",
+                item_select: 0,
+                summary: "",
+                topic: "",
+                test_api: "",
+                origin_data:{
+                    "topic": "",
+                    "startDate": "",
+                    "endDate": "",
+                    "dateRange": "",
+                    "isExactMatch": false,
+                    "mode": 0
+                },
+                discuss_num_set:true,
+                discuss_num:"",
+                discuss_other_num:"",
+                now_area_discuss_num_top:"",
+                discuss_rank_address: [],
+                bar_push:[],
+                line_pos:[],
+                line_neg:[],
+                search_record:"",
+                
+            }
+        },
+        methods: {
+            //==========================================================================================   
+//            role_btn(){
+//                document.getElementById("role_dialog").showModal();
+//            },
+//            role_dialog_close(){
+//                var radios = document.getElementsByName('role_select');
+//                for (var i = 0, length = radios.length; i < length; i++) {
+//                    if (radios[i].checked) {
+//                        this.search_input.role = radios[i].value;
+//                        switch(this.search_input.role){
+//                            case "normal":this.search_input.role = "一般民眾";break;
+//                            case "politics":this.search_input.role = "政治人物";break;
+//                            case "business":this.search_input.role = "商業企業";break;
+//                            case "technology":this.search_input.role = "科技公司";break;
+//                            case "other":this.search_input.role = "其他(地精、史萊姆)";break;
+//                        }
+//                        break;
+//                    }
+//                }
+//                document.getElementById("role_dialog").close();
+//            },
+            
+            //搜尋
+            search_btn() {
+                let api = api_url;
+                this.search_input = {
+                    "topic": document.getElementById("search_box").value,
+                    "startDate": document.getElementById("search_start").value,
+                    "endDate": document.getElementById("search_end").value,
+                    "dateRange": document.getElementById("dateRange").value,
+                    "mode": document.querySelector('input[name="mode"]:checked').value,
+                    "address":null,
+                };
+                if (document.getElementById("search_slider").checked) {
+                    this.search_input.isExactMatch = true;
+                }
+                else {
+                    this.search_input.isExactMatch = false;
+                }
+                if (this.search_input.dateRange == "") {
+                    this.search_input.dateRange = 30;
+                }
+                if (this.test_api != "") {
+                    api = this.test_api + "/api/";
+                }
+                if (this.search_input.topic == "" || this.search_input.startDate == "" || this.search_input.endDate == "") {
+                    alert("請輸入事件、時間，若已更換頁面，請重新輸入");
+                    document.getElementById("search_slider").checked = false;
+                    bubble.bubbly_create_search();
+                }
+                else {
+                    if(this.search_input.dateRange < 30){
+                        alert("輸入日期間隔小於30天，圖表座標軸將改為日期顯示\n每一日期代表與前個日期之間的間隔期間");
+                    }
+                    this.discuss_num_set = true;
+                    this.origin_data = this.search_input;
+                    search.search_btn(this.search_input.topic, this.search_input.startDate, this.search_input.endDate, this.search_input.dateRange, this.search_input.isExactMatch, this.search_input.mode, chart, api, token,this.search_input.address);
+                    
+                    this.search_record = "事件：" + this.search_input.topic + "<br>期間：" + this.search_input.startDate + " ~ " + this.search_input.endDate + "<br>日期間隔：" + this.search_input.dateRange + "天";
+                    
+                    document.getElementById("top_data").innerHTML = this.search_record;
+                    document.getElementById("top_data").style.display = "block";
+                }
+
+            },
+            
+            origin_search(){
+                document.getElementById('now_area').innerHTML = "現在點選位置：";
+//                document.getElementById('now_area_num').innerHTML = "點選地區數值：";
+                
+                let api = api_url;
+                if (this.test_api != "") {
+                    api = this.test_api + "/api/";
+                }
+                search.search_btn(this.origin_data.topic, this.origin_data.startDate, this.origin_data.endDate, this.origin_data.dateRange, this.origin_data.isExactMatch, this.origin_data.mode, chart, api, token,this.origin_data.address);
+            },
+            //==========================================================================================                
+            //登入登出
+            async login_btn() {
+                var login_info = await login.login_btn(api_url, this.account_input, this.password_input);
+                if (!login_info.bool) {
+                    this.account_input = "";
+                    this.password_input = "";
+                }
+                else {
+                    token = login_info.response;
+                    login_statu = 1;
+                }
+            },
+            logout_btn() {
+                var b = logout.logout_btn();
+                if (b == 1) {
+                    login_statu = 0;
+                    this.account_input = "";
+                    this.password_input = "";
+                }
+
+            },
+            //==========================================================================================                
+            //註冊
+            async register_btn() {
+                var s = this.email_input;
+                var register_info = await register.register_btn(api_url, this.account_input, this.password_input);
+                this.account_input = "";
+                this.password_input = "";
+                this.email_input = "";
+            },
+            //==========================================================================================                
+            //收藏列表(get)
+            async collect_get() {
+                this.collect_text = await collect.get_data_collect(api_url, token);
+                var re = await collect.get_save_collect(api_url, token);
+                this.folder = re.collect_list;
+                this.collect_data = re.return_data;
+            },
+
+            //==========================================================================================                
+            //結果收藏                 
+            async save_btn() {//顯示dialog
+                if (login_statu == 0) {
+                    alert("請先登入");
+                }
+                else {
+                    this.collect_get();
+                    document.getElementById("collect_info").showModal();
+                }
+            },
+            save() {//儲存結果
+                alert("已收藏");
+                var text = document.getElementById("collect_info_box");
+                collect.collect_post_item(api_url, token, text.value, id);
+                document.getElementById("collect_info_box").value = "";
+                document.getElementById("collect_info").close();
+            },
+            cancel_save() {//關閉dialog
+                document.getElementById("collect_info_box").value = "";
+                document.getElementById("collect_info").close();
+            },
+            //==========================================================================================                
+            //資料夾更動
+            async new_collect_btn() {//顯示dialog
+                document.getElementById("new_collect_info").showModal();
+                this.folder = "";
+                this.item = "";
+                this.collect_get();
+            },
+
+            async collect_post_folder() {//新增資料夾
+                alert("已新增資料夾");
+                var text = document.getElementById("collect_change_info_box");
+                await collect.collect_post_data(api_url, token, text.value);
+                text.value = "";
+                this.collect_get();
+                document.getElementById("new_collect_info").close();
+            },
+            async collect_post_change_folder() {//資料夾改名
+                alert("已更改名稱");
+                var text = document.getElementById("collect_change_info_box");
+                var select_folder = document.getElementById("select_folder2");
+                console.log(select_folder.value);
+                for (var collect_text = 0; collect_text < this.collect_data.length; collect_text++) {
+                    if (this.collect_data[collect_text].favoriteFolderName == select_folder.value) {
+                        id = this.collect_data[collect_text].favoriteFolderId;
+                    }
+                }
+
+                await collect.collect_patch_data(api_url, token, text.value, id);
+                text.value = "";
+                this.collect_get();
+                document.getElementById("new_collect_info").close();
+            },
+
+            async collect_delete_change_folder() {//資料夾刪除
+                if (this.item_select == 0) {
+                    alert("已刪除資料夾");
+                    var text = document.getElementById("collect_change_info_box");
+                    var select_folder = document.getElementById("select_folder2");
+                    console.log(select_folder.value);
+                    for (var collect_text = 0; collect_text < this.collect_data.length; collect_text++) {
+                        if (this.collect_data[collect_text].favoriteFolderName == select_folder.value) {
+                            id = this.collect_data[collect_text].favoriteFolderId;
+                        }
+                    }
+                    await collect.collect_delete_data(api_url, token, id);
+                    text.value = "";
+                    this.collect_get();
+                    document.getElementById("new_collect_info").close();
+                }
+                else if (this.item_select == 1) {
+                    alert("已刪除項目");
+                    var text = document.getElementById("collect_change_info_box");
+                    var select_item = document.getElementById("select_item");
+                    console.log(select_item.value);
+                    for (var collect_text = 0; collect_text < this.collect_data[id_index].favoriteFolderItems.length; collect_text++) {
+                        if (this.collect_data[id_index].favoriteFolderItems[collect_text].favoriteItem.favoriteItemName == select_item.value) {
+                            item_id = this.collect_data[id_index].favoriteFolderItems[collect_text].favoriteFolderItemId;
+                        }
+                    }
+                    await collect.collect_delete_item_data(api_url, token, item_id);
+                    text.value = "";
+                    this.collect_get();
+                    document.getElementById("new_collect_info").close();
+                }
+            },
+            async folder_change_result() {//選擇資料夾(結果)
+                var select_folder = document.getElementById("select_folder1");
+                for (var collect_text = 0; collect_text < this.collect_data.length; collect_text++) {
+                    if (this.collect_data[collect_text].favoriteFolderName == select_folder.value) {
+                        id = this.collect_data[collect_text].favoriteFolderId;
+                        id_index = collect_text;
+                    }
+                }
+                this.item = await collect.display_item(this.collect_data, id_index);
+                this.item_select = 0;
+                console.log(id);
+            },
+            async folder_change_collect() {//選擇資料夾(收藏列表)
+                var select_folder = document.getElementById("select_folder2");
+                for (var collect_text = 0; collect_text < this.collect_data.length; collect_text++) {
+                    if (this.collect_data[collect_text].favoriteFolderName == select_folder.value) {
+                        id = this.collect_data[collect_text].favoriteFolderId;
+                        id_index = collect_text;
+                    }
+                }
+                this.item = await collect.display_item(this.collect_data, id_index);
+                this.item_select = 0;
+                console.log(id);
+            },
+            async item_change() {//選擇項目
+                var select_folder = document.getElementById("select_folder2");
+                for (var collect_text = 0; collect_text < this.collect_data.length; collect_text++) {
+                    if (this.collect_data[collect_text].favoriteFolderName == select_folder.value) {
+                        id = this.collect_data[collect_text].favoriteFolderId;
+                        id_index = collect_text;
+                    }
+                }
+                //this.item = await collect.display_item(this.collect_data,id_index);
+                this.item_select = 1;
+            },
+            new_collect_cancel() {//關閉dialog                   
+                document.getElementById("collect_change_info_box").value = "";
+                document.getElementById("new_collect_info").close();
+            },
+            //==========================================================================================                
+            //最新消息
+            news_btn() {
+                this.news_text = "";
+                var news_box = ["最新資訊", "內容更新", "更新資訊", "最新資訊"];
+                this.news_text = news.news(news_box);
+            },
+            //==========================================================================================                
+            //顯示文字雲  
+            wc1_click() {
+                document.getElementById("word_cloud1_dialog").showModal();
+            },
+            wc1_close() {
+                document.getElementById("word_cloud1_dialog").close();
+            },
+            wc2_click() {
+                document.getElementById("word_cloud2_dialog").showModal();
+            },
+            wc2_close() {
+                document.getElementById("word_cloud2_dialog").close();
+            },
+            wc3_click() {
+                document.getElementById("word_cloud3_dialog").showModal();
+            },
+            wc3_close() {
+                document.getElementById("word_cloud3_dialog").close();
+            },
+            wc4_click() {
+                document.getElementById("word_cloud4_dialog").showModal();
+            },
+            wc4_close() {
+                document.getElementById("word_cloud4_dialog").close();
+            },
+            wc5_click() {
+                document.getElementById("word_cloud5_dialog").showModal();
+            },
+            wc5_close() {
+                document.getElementById("word_cloud5_dialog").close();
+            },
+            wc6_click() {
+                document.getElementById("word_cloud6_dialog").showModal();
+            },
+            wc6_close() {
+                document.getElementById("word_cloud6_dialog").close();
+            },
+            wc7_click() {
+                document.getElementById("word_cloud7_dialog").showModal();
+            },
+            wc7_close() {
+                document.getElementById("word_cloud7_dialog").close();
+            },
+            wc8_click() {
+                document.getElementById("word_cloud8_dialog").showModal();
+            },
+            wc8_close() {
+                document.getElementById("word_cloud8_dialog").close();
+            },
+            wc9_click() {
+                document.getElementById("word_cloud9_dialog").showModal();
+            },
+            wc9_close() {
+                document.getElementById("word_cloud9_dialog").close();
+            },
+
+            //==========================================================================================                
+            //關鍵字表格
+            line_data1_click() {
+                document.getElementById("line_data_dialog1").showModal();
+            },
+            line_data2_click() {
+                document.getElementById("line_data_dialog2").showModal();
+            },
+            line_data3_click() {
+                document.getElementById("line_data_dialog3").showModal();
+            },
+            line_data_dialog1_close() {
+                document.getElementById("line_data_dialog1").close();
+            },
+            line_data_dialog2_close() {
+                document.getElementById("line_data_dialog2").close();
+            },
+            line_data_dialog3_close() {
+                document.getElementById("line_data_dialog3").close();
+            },
+            article_dialog_show() {
+                document.getElementById("article_dialog").showModal();
+            },
+            article_dialog_close() {
+                document.getElementById("article_dialog").close();
+            },
+            pos_atr() {
+                chart.get_article_table_pos();
+            },
+            neg_atr() {
+                chart.get_article_table_neg();
+            },
+            search_select(){
+                document.getElementById("select_dialog").showModal();
+            },
+            close_search_select(){
+                document.getElementById("select_dialog").close();
+            },
+            
+
+            //==========================================================================================                
+            //更改推薦
+            async change_recommend() {
+                var data = {}
+                var recommend_list = [], recommend_value_list = [];
+                data = await search.get_data_TrendingTopic(api_url.replace("api/", ""), token);
+                this.recommend_info_title = this.recommend_info_title + data.articleNumber.toLocaleString();
+                for (var i = 0; i < data.trendingTopics.length; i++) {
+                    recommend_list[i] = data.trendingTopics[i].topic;
+                    recommend_value_list[i] = Math.round(data.trendingTopics[i].discussPercentage * 10000) / 100.00 + "%";
+                }
+                var recommend_change = setInterval(function () {
+                    vm.recommend_info = "關鍵字：" + recommend_list[Math.floor(Math.random() * recommend_list.length)] + "　　出現率：" + recommend_value_list[Math.floor(Math.random() * recommend_value_list.length)];
+                }, 5000);
+            },
+            
+            home(){
+                bubble.bubbly_create_search();
+            },
+            other_bubble(){
+                bubble.bubbly_create();
+            },
+
+            //==========================================================================================                
+            //其他
+            good() {
+                alert("已點喜歡");
+            },
+            bad() {
+                alert("已點不喜歡");
+            },
+        },
+        mounted: function () {
+            this.change_recommend();
+            bubble.bubbly_create_search();
+        },
+    }).mount('#app');
+    window.vm = vm
+</script>
+
+</html>
